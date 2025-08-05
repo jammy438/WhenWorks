@@ -10,7 +10,7 @@ def read_root():
 def health_check():
     return {"status": "healthy"}
 
-# Allows React (port 3000) to call FastAPI (port 8000) - as browsers block cross-origin requests by default
+# Allows React (port 3002) to call FastAPI (port 8000) - as browsers block cross-origin requests by default
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3002"],
