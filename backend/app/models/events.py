@@ -1,7 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime,ForeignKey, func
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-from .user import Base
+from app.models.base import Base # Import Base from the database module
 
 class Event(Base):
     __tablename__ = 'events'
