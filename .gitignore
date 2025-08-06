@@ -1,5 +1,6 @@
 venv/
 node_modules/
 .env
+app.config/
 __pycache__/
 *.pyc
