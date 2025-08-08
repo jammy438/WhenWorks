@@ -1,5 +1,4 @@
-# post for register, login
-# get current user info
+# Utility functions for authentication in a FastAPI application
 
 # Standard library imports
 from typing import Any, Optional
@@ -16,14 +15,13 @@ from sqlalchemy.orm import Session
 from database import get_db
 from app.models.user import User
 from schemas import TokenData
-from fastapi.security import OAuth2PasswordBearer
-from app.config.key_config import SECRET_KEY
+from app.config.key_config import SECRET_KEY, ALGORITHM
 
 # Create a password context for hashing passwords
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # OAuth2 scheme for token authentication
-OAuth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a plain password against a hashed password."""
@@ -56,7 +54,7 @@ def verify_token(token: str, credentials_exception) -> TokenData:
         raise credentials_exception
     return token_data
 
-def get_current_user(token: str = Depends(OAuth2_scheme), db: Session = Depends(get_db)) -> User:
+def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
     """Get the current user from the token."""
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,

@@ -1,7 +1,6 @@
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from app.models.base import Base
+from app.models.base import Base  # Only import Base from your base.py
 from app.config.database_config import DATABASE_URL
 
 # Create the SQLAlchemy engine
@@ -22,5 +21,7 @@ def get_db():
 def init_db():
     # Import models to ensure they are registered with Base
     from app.models import user, events
-    # Since all models should inherit from the same Base, you only need to call this once
+    
+    # Create all tables using the Base from base.py
     Base.metadata.create_all(bind=engine)
+    print("Database tables created successfully!")
