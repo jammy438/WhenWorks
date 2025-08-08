@@ -28,7 +28,7 @@ def get_user_by_id(user_id: int, db: Session = Depends(get_db)):
         logger.warning(f"User with id {user_id} not found.")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     
-    logger.info(f"Retrieved user with id {user_id}.")
+    logger.debug(f"Retrieved user with id {user_id}.")
     return user
 
 # The above endpoint accepts a user ID from the URL path, queries the database

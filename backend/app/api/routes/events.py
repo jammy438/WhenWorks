@@ -26,7 +26,7 @@ def get_events(current_user: User = Depends(get_current_user), db: Session = Dep
     if not events:
         logger.warning(f"No events found for user {current_user.username}.")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No events found")
-    logger.info(f"Retrieved {len(events)} events for user {current_user.username}.")
+    logger.debug(f"Retrieved {len(events)} events for user {current_user.username}.")
     return events
 
 @router.post("/", response_model=EventResponse, status_code=status.HTTP_201_CREATED)
@@ -36,7 +36,7 @@ def create_event(event: EventCreate, current_user: User = Depends(get_current_us
     db.add(new_event)
     db.commit()
     db.refresh(new_event)
-    logger.info(f"Event {new_event.title} created for user {current_user.username}.")
+    logger.debug(f"Event {new_event.title} created for user {current_user.username}.")
     return new_event
 
 @router.put("/{event_id}", response_model=EventResponse)
@@ -52,7 +52,7 @@ def update_event(event_id: int, event_update: EventUpdate, current_user: User = 
     
     db.commit()
     db.refresh(event)
-    logger.info(f"Event {event.title} updated for user {current_user.username}.")
+    logger.debug(f"Event {event.title} updated for user {current_user.username}.")
     return event
 
 @router.delete("/{event_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -65,6 +65,6 @@ def delete_event(event_id: int, current_user: User = Depends(get_current_user), 
     
     db.delete(event)
     db.commit()
-    logger.info(f"Event {event.title} deleted for user {current_user.username}.")
+    logger.debug(f"Event {event.title} deleted for user {current_user.username}.")
     return {"detail": "Event deleted successfully"}
 

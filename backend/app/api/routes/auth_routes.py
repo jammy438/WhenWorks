@@ -127,7 +127,7 @@ def update_user_info(
     if user_data.password:
         hashed_password = get_password_hash(user_data.password)
         update_data['hashed_password'] = hashed_password
-        logger.info(f"User {current_user.email} updated password successfully.")
+        logger.debug(f"User {current_user.email} updated password successfully.")
     
     # Perform the update if there's data to update
     if update_data:
@@ -136,7 +136,7 @@ def update_user_info(
         
         # Get the updated user
         updated_user = db.query(User).filter(User.id == current_user.id).first()
-        logger.info(f"User updated successfully.")
+        logger.debug(f"User updated successfully.")
         return updated_user
     
     # No updates needed
@@ -147,5 +147,5 @@ def delete_user(current_user: User = Depends(get_current_user), db: Session = De
     """Delete the current user's account."""
     db.delete(current_user)
     db.commit()
-    logger.info(f"User {current_user.email} deleted successfully.")
+    logger.debug(f"User {current_user.email} deleted successfully.")
     return None

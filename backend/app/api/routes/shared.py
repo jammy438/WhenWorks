@@ -11,7 +11,10 @@ import logging
 from schemas import UserResponse
 from app.utils.auth import get_current_user
 
+#Logging is heavy. Trace, info, warn and error (standard) - should be able to configure what level you want. change infos to traces? would allow to debug in trace mode. live would be info. diff levels of logging at test, live etc.
+# utalise global logger to - create own logger class as wrapper which can set variables auto and then import it from wrapper -  link to config and manually setin env?
 logger = logging.getLogger(__name__)
+
 router = APIRouter(prefix="/shared", tags=["shared"])
 
 def get_database_connection():
@@ -25,7 +28,7 @@ def get_shared_users(current_user: User = Depends(get_current_user), db: Session
     if not shared_users:
         logger.warning(f"No users found with whom {current_user.email}'s calendar is shared.")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No users found")
-    logger.info(f"Retrieved {len(shared_users)} users with whom {current_user.email}'s calendar is shared.")
+    logger.debug(f"Retrieved {len(shared_users)} users with whom {current_user.email}'s calendar is shared.")
     return shared_users
 
 @router.post("/share/{user_id}", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
@@ -37,13 +40,13 @@ def share_calendar_with_user(user_id: int, current_user: User = Depends(get_curr
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     
     if user_to_share in current_user.shared_with:
-        logger.info(f"{current_user.email} has already shared their calendar with {user_to_share.email}.")
+        logger.debug(f"{current_user.email} has already shared their calendar with {user_to_share.email}.")
         return user_to_share
     
     current_user.shared_with.append(user_to_share)
     db.commit()
     db.refresh(current_user)
-    logger.info(f"{current_user.email} shared their calendar with {user_to_share.email}.")
+    logger.debug(f"{current_user.email} shared their calendar with {user_to_share.email}.")
     return user_to_share
 
 @router.delete("/unshare/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -55,12 +58,12 @@ def unshare_calendar_with_user(user_id: int, current_user: User = Depends(get_cu
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     
     if user_to_unshare not in current_user.shared_with:
-        logger.info(f"{current_user.email} has not shared their calendar with {user_to_unshare.email}.")
+        logger.debug(f"{current_user.email} has not shared their calendar with {user_to_unshare.email}.")
         return
     
     current_user.shared_with.remove(user_to_unshare)
     db.commit()
-    logger.info(f"{current_user.email} unshared their calendar with {user_to_unshare.email}.")
+    logger.debug(f"{current_user.email} unshared their calendar with {user_to_unshare.email}.")
 
     return {"detail": "Calendar unshared successfully"}
 
@@ -71,7 +74,7 @@ def get_calendars_shared_with_me(current_user: User = Depends(get_current_user),
     if not users_who_shared:
         logger.warning(f"No users found who have shared their calendars with {current_user.email}.")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No users found")
-    logger.info(f"Retrieved {len(users_who_shared)} users who have shared their calendars with {current_user.email}.")
+    logger.debug(f"Retrieved {len(users_who_shared)} users who have shared their calendars with {current_user.email}.")
     return users_who_shared
 
 @router.post("/share-with-me/{user_id}", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
@@ -83,13 +86,13 @@ def share_calendar_with_me(user_id: int, current_user: User = Depends(get_curren
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     
     if current_user in user_to_share.shared_with:
-        logger.info(f"{user_to_share.email} has already shared their calendar with {current_user.email}.")
+        logger.debug(f"{user_to_share.email} has already shared their calendar with {current_user.email}.")
         return current_user
     
     user_to_share.shared_with.append(current_user)
     db.commit()
     db.refresh(user_to_share)
-    logger.info(f"{user_to_share.email} shared their calendar with {current_user.email}.")
+    logger.debug(f"{user_to_share.email} shared their calendar with {current_user.email}.")
     return current_user
 
 @router.delete("/unshare-with-me/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -101,12 +104,12 @@ def unshare_calendar_with_me(user_id: int, current_user: User = Depends(get_curr
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     
     if current_user not in user_to_unshare.shared_with:
-        logger.info(f"{user_to_unshare.email} has not shared their calendar with {current_user.email}.")
+        logger.debug(f"{user_to_unshare.email} has not shared their calendar with {current_user.email}.")
         return
     
     user_to_unshare.shared_with.remove(current_user)
     db.commit()
-    logger.info(f"{user_to_unshare.email} unshared their calendar with {current_user.email}.")
+    logger.debug(f"{user_to_unshare.email} unshared their calendar with {current_user.email}.")
     
     return {"detail": "Calendar unshared successfully"}
 
@@ -119,10 +122,10 @@ def get_shared_calendar_with_me(user_id: int, current_user: User = Depends(get_c
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     
     if current_user not in user_to_check.shared_with:
-        logger.info(f"{user_to_check.email} has not shared their calendar with {current_user.email}.")
+        logger.debug(f"{user_to_check.email} has not shared their calendar with {current_user.email}.")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Calendar not shared with you")
     
-    logger.info(f"Retrieved shared calendar for {user_to_check.email} for {current_user.email}.")
+    logger.debug(f"Retrieved shared calendar for {user_to_check.email} for {current_user.email}.")
     return user_to_check
 
 @router.get("/shared-with-me/{user_id}/events", response_model=list[EventResponse])
@@ -134,7 +137,7 @@ def get_shared_events_with_me(user_id: int, current_user: User = Depends(get_cur
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     
     if current_user not in user_to_check.shared_with:
-        logger.info(f"{user_to_check.email} has not shared their calendar with {current_user.email}.")
+        logger.debug(f"{user_to_check.email} has not shared their calendar with {current_user.email}.")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Calendar not shared with you")
     
     events = db.query(Event).filter(Event.owner_id == user_to_check.id).all()
@@ -142,7 +145,7 @@ def get_shared_events_with_me(user_id: int, current_user: User = Depends(get_cur
         logger.warning(f"No events found in {user_to_check.email}'s calendar shared with {current_user.email}.")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No events found")
     
-    logger.info(f"Retrieved {len(events)} events from {user_to_check.email}'s calendar shared with {current_user.email}.")
+    logger.debug(f"Retrieved {len(events)} events from {user_to_check.email}'s calendar shared with {current_user.email}.")
     return events
 
 @router.post("/share-with-me/{user_id}/events", response_model=EventResponse, status_code=status.HTTP_201_CREATED)
@@ -166,10 +169,10 @@ def share_event_with_me(event_data: EventCreate, user_id: int, current_user: Use
         db.add(new_event)
         db.commit()
         db.refresh(new_event)
-        logger.info(f"{user_to_share.email} shared an event with {current_user.email}.")
+        logger.debug(f"{user_to_share.email} shared an event with {current_user.email}.")
         return new_event
     
-    logger.info(f"{user_to_share.email} has not shared their calendar with {current_user.email}.")
+    logger.debug(f"{user_to_share.email} has not shared their calendar with {current_user.email}.")
     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Calendar not shared with you")
 
 @router.delete("/unshare-with-me/{user_id}/events/{event_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -181,7 +184,7 @@ def unshare_event_with_me(event_id: int, user_id: int, current_user: User = Depe
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     
     if current_user not in user_to_unshare.shared_with:
-        logger.info(f"{user_to_unshare.email} has not shared their calendar with {current_user.email}.")
+        logger.debug(f"{user_to_unshare.email} has not shared their calendar with {current_user.email}.")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Calendar not shared with you")
     
     event_to_unshare = db.query(Event).filter(Event.id == event_id, Event.owner_id == user_to_unshare.id).first()
@@ -191,6 +194,6 @@ def unshare_event_with_me(event_id: int, user_id: int, current_user: User = Depe
     
     db.delete(event_to_unshare)
     db.commit()
-    logger.info(f"{user_to_unshare.email} unshared event {event_to_unshare.title} with {current_user.email}.")
+    logger.debug(f"{user_to_unshare.email} unshared event {event_to_unshare.title} with {current_user.email}.")
     
     return {"detail": "Event unshared successfully"}
