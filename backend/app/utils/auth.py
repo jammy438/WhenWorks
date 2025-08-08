@@ -15,8 +15,7 @@ from sqlalchemy.orm import Session
 from database import get_db
 from app.models.user import User
 from schemas import TokenData
-from fastapi.security import OAuth2PasswordBearer
-from app.config.key_config import SECRET_KEY
+from app.config.key_config import SECRET_KEY, ALGORITHM
 
 # Create a password context for hashing passwords
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
