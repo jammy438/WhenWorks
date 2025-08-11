@@ -45,6 +45,18 @@ def test_get_events_empty_db(mock_db) -> None:
     mock_db.query.return_value.filter.assert_called_once()
     mock_db.query.return_value.filter.return_value.all.assert_called_once()
 
+def test_update_event_not_found(mock_db) -> None:
+    """Test that update raises 404 when event doesn't exist."""
+    Test_user_4 = MagicMock(id=4, username="testuser1")
+    
+    mock_db.query.return_value.filter.return_value.first.return_value = None
+    
+    with pytest.raises(HTTPException) as exc_info:
+        update_event(db=mock_db, event_id=999, event_update=MagicMock(), current_user=Test_user_4)
+    
+    assert exc_info.value.status_code == 404
+    assert str(exc_info.value.detail) == "Event not found"
+
 def test_get_events_returns_events_with_correct_data(mock_db) -> None:
     Test_user_1 = MagicMock(id=1, username="testuser1")
     Test_event_1 = MagicMock(id=1, title="Test Event 1", owner_id=Test_user_1.id)
@@ -91,4 +103,47 @@ def test_create_event(mock_event, mock_db) -> None:
     mock_db.add.assert_called_once()
     mock_db.commit.assert_called_once()
     mock_db.refresh.assert_called_once_with(result)
+
+@patch('app.api.routes.events.Event')
+def test_update_event(mock_event, mock_db) -> None:
+    """Test that an event can be updated for the current user."""
+    Test_user_4 = MagicMock(id=4, username="testuser1")
+    Test_event_4 = MagicMock(id=4, title="Test Event 4", owner_id=Test_user_4.id)
+    
+    mock_event.return_value = Test_event_4
+    
+    mock_db.query.return_value.filter.return_value.first.return_value = Test_event_4
+    mock_db.commit = MagicMock()
+    mock_db.refresh = MagicMock()
+    mock_db.commit.return_value = None
+    mock_db.refresh.return_value = None
+
+    result: Any= update_event(db=mock_db, event_id=MagicMock, event_update=MagicMock() , current_user=Test_user_4)
+
+
+    assert result.title == "Test Event 4"
+    assert result.owner_id == Test_user_4.id
+
+    mock_db.commit.assert_called_once()
+    mock_db.refresh.assert_called_once_with(result)
+    mock_db.query.return_value.filter.return_value.first.assert_called_once()
+
+@patch('app.api.routes.events.Event')
+def test_delete_event(mock_event, mock_db) -> None:
+    """Test that an event can be deleted for the current user."""
+    Test_user_5 = MagicMock(id=5, username="testuser1")
+    Test_event_5 = MagicMock(id=5, title="Test Event 4", owner_id=Test_user_5.id)
+    
+    mock_event.return_value = Test_event_5
+    
+    mock_db.query.return_value.filter.return_value.first.return_value = Test_event_5
+    mock_db.delete = MagicMock()
+    mock_db.commit = MagicMock()
+    mock_db.commit.return_value = None
+    mock_db.delete.return_value = None
+    
+    result: Any= delete_event(db=mock_db, event_id=5, current_user=Test_user_5)
+
+    mock_db.delete.assert_called_once_with(Test_event_5)
+    mock_db.query.return_value.filter.return_value.first.assert_called_once()
 
