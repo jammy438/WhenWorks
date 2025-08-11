@@ -95,10 +95,8 @@ def test_create_event(mock_event, mock_db) -> None:
 
     result: Any= create_event(db=mock_db, event=MagicMock() , current_user=Test_user_4)
 
-
     assert result.title == "Test Event 4"
     assert result.owner_id == Test_user_4.id
-
 
     mock_db.add.assert_called_once()
     mock_db.commit.assert_called_once()
@@ -120,13 +118,28 @@ def test_update_event(mock_event, mock_db) -> None:
 
     result: Any= update_event(db=mock_db, event_id=MagicMock, event_update=MagicMock() , current_user=Test_user_4)
 
-
     assert result.title == "Test Event 4"
     assert result.owner_id == Test_user_4.id
 
     mock_db.commit.assert_called_once()
     mock_db.refresh.assert_called_once_with(result)
     mock_db.query.return_value.filter.return_value.first.assert_called_once()
+
+@patch('app.api.routes.events.Event')
+def test_event_not_found(mock_event, mock_db) -> None:
+    """Test that when event isn't found it raises an error."""
+    Test_user_5 = MagicMock(id=5, username="testuser1")
+    
+    mock_db.query.return_value.filter.return_value.first.return_value = None
+    
+    with pytest.raises(HTTPException) as exc_info:
+        update_event(db=mock_db, event_id=999, event_update=MagicMock(), current_user=Test_user_5)
+    
+    assert exc_info.value.status_code == 404
+    assert str(exc_info.value.detail) == "Event not found"
+
+    mock_db.query.assert_called_once_with(mock_event)
+    mock_db.query.return_value.filter.assert_called_once()
 
 @patch('app.api.routes.events.Event')
 def test_delete_event(mock_event, mock_db) -> None:
