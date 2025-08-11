@@ -9,7 +9,7 @@
 #test that an event cannot be deleted if it does not exist or belong to current user
 
 import pytest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from fastapi import HTTPException
 from app.api.routes.events import get_events, create_event, update_event, delete_event
 from app.models.events import Event
@@ -20,6 +20,16 @@ def mock_db():
     """Mock database session."""
     db = MagicMock()
     return db
+
+def mock_event():
+    """Mock event object for testing."""
+    event = MagicMock(spec=Event)
+    event.id = 1
+    event.title = "Test Event"
+    event.description = "This is a test event."
+    event.date = "2023-10-01"
+    event.owner_id = 1
+    return event
 
 def test_get_events_empty_db(mock_db) -> None:
     """Test that no events are returned when the database is empty."""
@@ -34,3 +44,51 @@ def test_get_events_empty_db(mock_db) -> None:
     mock_db.query.assert_called_once_with(Event)
     mock_db.query.return_value.filter.assert_called_once()
     mock_db.query.return_value.filter.return_value.all.assert_called_once()
+
+def test_get_events_returns_events_with_correct_data(mock_db) -> None:
+    Test_user_1 = MagicMock(id=1, username="testuser1")
+    Test_event_1 = MagicMock(id=1, title="Test Event 1", owner_id=Test_user_1.id)
+
+    mock_query = MagicMock()
+    mock_query.all.return_value = [Test_event_1]
+    mock_db.query.return_value.filter.return_value = mock_query
+
+    result: List[Any] = get_events(db=mock_db, current_user=Test_user_1)
+
+    assert len(result) == 1
+    assert result[0].id == 1
+
+    assert result[0].title == "Test Event 1"
+    assert result[0].owner_id == Test_user_1.id
+
+    mock_db.query.assert_called_once_with(Event)
+    mock_db.query.return_value.filter.assert_called_once()
+    mock_db.query.return_value.filter.return_value.all.assert_called_once()
+
+@patch('app.api.routes.events.Event')
+def test_create_event(mock_event, mock_db) -> None:
+    """Test that an event can be created for the current user."""
+    Test_user_4 = MagicMock(id=4, username="testuser1")
+    Test_event_4 = MagicMock(id=4, title="Test Event 4", owner_id=Test_user_4.id)
+    
+    mock_event.return_value = Test_event_4
+    
+    mock_db.add = MagicMock()
+    mock_db.commit = MagicMock()
+    mock_db.refresh = MagicMock()
+
+    mock_db.add.return_value = None
+    mock_db.commit.return_value = None
+    mock_db.refresh.return_value = None
+
+    result: Any= create_event(db=mock_db, event=MagicMock() , current_user=Test_user_4)
+
+
+    assert result.title == "Test Event 4"
+    assert result.owner_id == Test_user_4.id
+
+
+    mock_db.add.assert_called_once()
+    mock_db.commit.assert_called_once()
+    mock_db.refresh.assert_called_once_with(result)
+
