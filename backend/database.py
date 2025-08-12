@@ -21,9 +21,12 @@ def get_db():
 
 # Create all tables in the database (if they don't exist)
 def init_db():
-    # Import models to ensure they are registered with Base
-    from app.models import user, events
-    
-    # Create all tables using the Base from base.py
-    Base.metadata.create_all(bind=engine)
-    print("Database tables created successfully!")
+    """
+    Initialize database.
+    Tables are now created/updated via Alembic migrations.
+    Run: alembic upgrade head
+    """
+    print("Database initialization")
+    print("Tables are managed by Alembic migrations")
+    print("Run 'alembic upgrade head' to create/update tables")
+    print("️Run 'alembic revision --autogenerate -m \"description\"' after model changes")
