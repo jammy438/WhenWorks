@@ -7,13 +7,13 @@ from database import get_db
 from app.models.user import User
 from app.models.events import Event
 from schemas import EventResponse, EventCreate, EventUpdate
-import logging
+from app.core.logging import get_logger
 from schemas import UserResponse
 from app.utils.auth import get_current_user
 
 #Logging is heavy. Trace, info, warn and error (standard) - should be able to configure what level you want. change infos to traces? would allow to debug in trace mode. live would be info. diff levels of logging at test, live etc.
 # utalise global logger to - create own logger class as wrapper which can set variables auto and then import it from wrapper -  link to config and manually setin env?
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 router = APIRouter(prefix="/shared", tags=["shared"])
 
