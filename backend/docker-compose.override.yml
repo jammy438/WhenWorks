@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      target: builder  # Use development build
+    environment:
+      - DEBUG=true
+      - LOG_LEVEL=DEBUG
+    volumes:
+      - .:/app  # Mount source code for development
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+  db:
+    ports:
+      - "5433:5432"  # Different port for local development
