@@ -40,6 +40,11 @@ class Settings(BaseSettings):
     
     # Logging config - helps debug issues when things go wrong
     log_level: str = "INFO"
+    log_format: str = "json"  # "json" or "text"
+    log_file: str = "app.log"
+    log_max_size: int = 10 * 1024 * 1024  # 10MB
+    log_backup_count: int = 5
+    log_retention_days: int = 30
     
     # External services I might need later - Redis for caching, email for notifications
     redis_url: str = "redis://localhost:6379/0"
