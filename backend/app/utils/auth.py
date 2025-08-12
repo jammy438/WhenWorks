@@ -15,7 +15,9 @@ from sqlalchemy.orm import Session
 from database import get_db
 from app.models.user import User
 from schemas import TokenData
-from app.config.key_config import SECRET_KEY, ALGORITHM
+from app.config.settings import get_settings
+
+settings = get_settings()
 
 # Create a password context for hashing passwords
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -39,13 +41,13 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     else:
         expire = datetime.now(timezone.utc) + timedelta(minutes=15)
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm="HS256")
+    encoded_jwt = jwt.encode(to_encode, settings.secret_key, algorithm="HS256")
     return encoded_jwt
 
 def verify_token(token: str, credentials_exception) -> TokenData:
     """Verify a JWT token and return the token data."""
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+        payload = jwt.decode(token, settings.secret_key, algorithms=["HS256"])
         username = payload.get("sub")
         if username is None:
             raise credentials_exception

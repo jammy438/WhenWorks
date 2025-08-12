@@ -1,10 +1,12 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from app.models.base import Base  # Only import Base from your base.py
-from app.config.database_config import DATABASE_URL
+from app.models.base import Base
+from app.config.settings import get_settings
+
+settings = get_settings()
 
 # Create the SQLAlchemy engine
-engine = create_engine(DATABASE_URL, echo=True)
+engine = create_engine(settings.database_url, echo=True)
 
 # Create a configured "Session" class
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
