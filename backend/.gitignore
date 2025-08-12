@@ -1,0 +1,11 @@
+.env
+.env.*
+
+# Environment files - all patterns
+.env
+.env.*
+*.env
+.development.env
+.staging.env
+.production.env
+.example.env

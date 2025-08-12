@@ -1,6 +1,11 @@
 venv/
 node_modules/
 .env
+.env.local
+.env.development
+.env.staging
+.env.production
 app.config/
 __pycache__/
-*.pyc 
+*.pyc
+!.env.example
