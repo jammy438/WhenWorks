@@ -4,11 +4,11 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from database import get_db
 from app.models.user import User
-import logging
+from app.core.logging import get_logger
 from schemas import UserResponse, UserOut
 from app.utils.auth import get_current_user
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 router = APIRouter()
 
 @router.get("/", response_model=list[UserResponse])

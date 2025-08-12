@@ -7,12 +7,12 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from database import get_db
 from app.models.events import Event
-import logging
+from app.core.logging import get_logger
 from schemas import EventCreate, EventResponse, EventUpdate
 from app.utils.auth import get_current_user
 from app.models.user import User
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 router = APIRouter(prefix="/events", tags=["events"])
 
 def get_database_connection():

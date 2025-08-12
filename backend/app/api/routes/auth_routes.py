@@ -6,11 +6,11 @@ from sqlalchemy.orm import Session
 from app.utils.auth import get_current_user, verify_password, get_password_hash, create_access_token
 from database import get_db
 from app.models.user import User
-import logging
 from schemas import Token, TokenData, UserCreate, UserResponse, UserUpdate, UserLogin
 from datetime import timedelta
+from app.core.logging import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 router = APIRouter()
 
