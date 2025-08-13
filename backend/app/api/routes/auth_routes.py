@@ -6,9 +6,12 @@ from sqlalchemy.orm import Session
 from app.utils.auth import get_current_user, verify_password, get_password_hash, create_access_token
 from database import get_db
 from app.models.user import User
-from schemas import Token, TokenData, UserCreate, UserResponse, UserUpdate, UserLogin
+from schemas import Token, UserCreate, UserResponse, UserUpdate, UserLogin
 from datetime import timedelta
 from app.core.logging import get_logger
+from app.models.user import User
+from app.utils.auth import get_current_user
+
 
 logger = get_logger(__name__)
 

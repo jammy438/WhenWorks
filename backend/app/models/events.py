@@ -15,6 +15,8 @@ class Event(Base):
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
     owner_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     
+    owner_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    
     owner = relationship("User", back_populates="events")
     
     def __repr__(self):

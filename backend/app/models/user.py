@@ -5,8 +5,8 @@ from app.models.base import Base # Import Base from the database module
 
 user_shares = Table(
     'user_shares', Base.metadata,
-    Column('sharer_id', Integer, ForeignKey('users.id')),
-    Column('shared_with_id', Integer, ForeignKey('users.id'))
+    Column('sharer_id', Integer, ForeignKey('users.id'), primary_key=True),
+    Column('shared_with_id', Integer, ForeignKey('users.id'), primary_key=True), extend_existing=True 
 )
 
 class User(Base):
@@ -20,7 +20,7 @@ class User(Base):
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
     
-    events = relationship("Event", back_populates="owner")
+    events = relationship("Event", back_populates="owner", cascade="all, delete-orphan")
     
     # For calendar sharing
     shared_with = relationship(
