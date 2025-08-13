@@ -6,7 +6,6 @@ from database import get_db
 from app.models.user import User
 from app.core.logging import get_logger
 from schemas import UserResponse, UserOut
-from app.utils.auth import get_current_user
 
 logger = get_logger(__name__)
 router = APIRouter()
